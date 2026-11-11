@@ -8,12 +8,14 @@ require("./config/db");
 const app = express();
 
 // 🌍 CORS
-app.use(
-  cors({
-    origin: "https://devlog-dun.vercel.app",
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: [
+    "https://devlog-dun.vercel.app",
+    "http://localhost:5173"
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  credentials: true
+}));
 
 // 📦 MIDDLEWARE
 app.use(express.json());

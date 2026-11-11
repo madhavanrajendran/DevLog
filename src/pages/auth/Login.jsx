@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 import {
@@ -83,19 +84,19 @@ const Login = () => {
         await response.json();
 
       if (!response.ok) {
-        throw new toast.error(
+        throw new Error(
           data.message ||
-            "Login failed"
+          "Login failed"
         );
       }
 
-      // ✅ SAVE TOKEN
+      // SAVE TOKEN
       localStorage.setItem(
         "token",
         data.token
       );
 
-      // ✅ UPDATE AUTH CONTEXT
+      // UPDATE AUTH CONTEXT
       login(data.user);
 
       toast.success("Login successful ✅");
@@ -107,7 +108,7 @@ const Login = () => {
 
       toast.error(
         error.message ||
-          "Something went wrong"
+        "Something went wrong"
       );
 
     } finally {

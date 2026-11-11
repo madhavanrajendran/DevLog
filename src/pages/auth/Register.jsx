@@ -1,15 +1,10 @@
+
 import { useState } from "react";
-
 import { Link, useNavigate } from "react-router-dom";
-
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-
 import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
-
 import { Card, CardContent } from "@/components/ui/card";
-
 import toast from "react-hot-toast";
 
 const Register = () => {
@@ -42,13 +37,11 @@ const Register = () => {
         `${import.meta.env.VITE_API_URL}/auth/register`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify(formData),
-        },
+        }
       );
 
       const data = await response.json();
@@ -57,12 +50,14 @@ const Register = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      toast.success("Account created successfully ✅");
+      toast.success("OTP sent to your email 📩");
 
-      navigate("/login");
+      navigate("/verify-otp", {
+        state: { email: formData.email },
+      });
+
     } catch (error) {
       console.error(error);
-
       toast.error(error.message || "Something went wrong");
     } finally {
       setLoading(false);

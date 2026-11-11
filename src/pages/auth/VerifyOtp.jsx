@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 
 import {
   ArrowLeft,
@@ -12,95 +13,88 @@ import {
 
 import toast from "react-hot-toast";
 
-
 const VerifyOtp = () => {
-
   const [otp, setOtp] = useState("");
-
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
   const location = useLocation();
 
-  const email =
-    location.state?.email;
+  const email = location.state?.email;
 
+  // Check whether email exists
+  useEffect(() => {
+    if (!email) {
+      toast.error("Please register first");
+      navigate("/register", { replace: true });
+    }
+  }, [email, navigate]);
 
+  // Handle OTP input
+  const handleOtpChange = (e) => {
+    const value = e.target.value
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    setOtp(value);
+  };
+
+  // Verify OTP
   const handleVerifyOtp = async (e) => {
-
     e.preventDefault();
 
-    if (!otp) {
+    if (!email) {
+      return toast.error("Email address is missing");
+    }
 
-      return toast.error(
-        "Please enter OTP"
-      );
-
+    if (otp.length !== 6) {
+      return toast.error("Please enter the 6-digit OTP");
     }
 
     try {
-
       setLoading(true);
 
-      const response =
-        await fetch(
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+        {
+          method: "POST",
 
-          `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              email,
-              otp,
-            }),
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.message
-        );
-
-      }
-
-     
-      toast.success(
-        "Account verified successfully"
+          body: JSON.stringify({
+            email,
+            otp,
+          }),
+        }
       );
 
-      navigate("/login");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "OTP verification failed"
+        );
+      }
+
+      toast.success("Account verified successfully ✅");
+
+      navigate("/login", { replace: true });
 
     } catch (error) {
-
       console.error(error);
 
       toast.error(
-        error.message ||
-        "Verification failed"
+        error.message || "Verification failed"
       );
 
     } finally {
-
       setLoading(false);
-
     }
   };
 
-
   return (
-
     <section
       className="
         min-h-screen
@@ -112,7 +106,6 @@ const VerifyOtp = () => {
         py-10
       "
     >
-
       <div
         className="
           w-full
@@ -141,7 +134,6 @@ const VerifyOtp = () => {
             mb-8
           "
         >
-
           <MailCheck
             className="
               w-12
@@ -149,9 +141,7 @@ const VerifyOtp = () => {
               text-black
             "
           />
-
         </div>
-
 
         {/* TITLE */}
         <div className="text-center">
@@ -191,7 +181,6 @@ const VerifyOtp = () => {
 
         </div>
 
-
         {/* OTP FORM */}
         <form
           onSubmit={handleVerifyOtp}
@@ -210,16 +199,16 @@ const VerifyOtp = () => {
             below
           </p>
 
-
           {/* OTP INPUT */}
           <input
             type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
             maxLength={6}
             value={otp}
-            onChange={(e) =>
-              setOtp(e.target.value)
-            }
+            onChange={handleOtpChange}
             placeholder="------"
+            required
             className="
               w-full
               h-20
@@ -237,7 +226,6 @@ const VerifyOtp = () => {
             "
           />
 
-
           {/* TIMER */}
           <p
             className="
@@ -251,11 +239,10 @@ const VerifyOtp = () => {
             in 5 minutes
           </p>
 
-
           {/* BUTTON */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !email}
             className="
               w-full
               mt-10
@@ -267,25 +254,21 @@ const VerifyOtp = () => {
               font-semibold
               hover:opacity-90
               transition
+              disabled:opacity-50
+              disabled:cursor-not-allowed
             "
           >
-
-            {
-              loading
-                ? "Verifying..."
-                : "Verify OTP"
-            }
-
+            {loading
+              ? "Verifying..."
+              : "Verify OTP"}
           </button>
 
         </form>
 
-
         {/* BACK BUTTON */}
         <button
-          onClick={() =>
-            navigate("/register")
-          }
+          type="button"
+          onClick={() => navigate("/register")}
           className="
             flex
             items-center
@@ -297,17 +280,12 @@ const VerifyOtp = () => {
             transition
           "
         >
-
-          <ArrowLeft
-            className="w-4 h-4"
-          />
+          <ArrowLeft className="w-4 h-4" />
 
           Back to Register
-
         </button>
 
       </div>
-
     </section>
   );
 };
