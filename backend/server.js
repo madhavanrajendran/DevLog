@@ -10,7 +10,7 @@ const app = express();
 // 🌍 CORS
 app.use(cors({
   origin: [
-    "https://devlog-dun.vercel.app",
+    "https://dev-log-weld.vercel.app",
     "http://localhost:5173"
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
